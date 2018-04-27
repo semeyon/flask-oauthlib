@@ -7,7 +7,7 @@
 
     :copyright: (c) 2013 - 2014 by Hsiaoming Yang.
 """
-
+import ssl
 import logging
 import oauthlib.oauth1
 import oauthlib.oauth2
@@ -219,6 +219,7 @@ class OAuthRemoteApp(object):
     :param content_type: force to parse the content with this content_type,
                          usually used when the server didn't return the
                          right content type.
+    :param ssl_verification: set False to switch off ssl verification
 
     .. versionadded:: 0.3.0
 
@@ -243,6 +244,7 @@ class OAuthRemoteApp(object):
         content_type=None,
         app_key=None,
         encoding='utf-8',
+        ssl_verification = True
     ):
         self.oauth = oauth
         self.name = name
@@ -262,6 +264,7 @@ class OAuthRemoteApp(object):
         self._access_token_headers = access_token_headers or {}
         self._content_type = content_type
         self._tokengetter = None
+        self._ssl_verification = ssl_verification
 
         self.app_key = app_key
         self.encoding = encoding
@@ -397,11 +400,16 @@ class OAuthRemoteApp(object):
             uri, headers, data, method
         )
 
+        ctx = ssl.create_default_context()
+        if not self._ssl_verification:
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+
         log.debug('Request %r with %r method' % (uri, method))
         req = http.Request(uri, headers=headers, data=data)
         req.get_method = lambda: method.upper()
         try:
-            resp = http.urlopen(req)
+            resp = http.urlopen(req, context=ctx)
             content = resp.read()
             resp.close()
             return resp, content
