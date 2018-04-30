@@ -697,8 +697,10 @@ class OAuthRemoteApp(object):
                 'Unsupported access_token_method: %s' %
                 self.access_token_method
             )
-
+        log.info(resp)
+        log.info(content)
         data = parse_response(resp, content, content_type=self.content_type)
+        log.info(data)
         if resp.code not in (200, 201):
             raise OAuthException(
                 'Invalid response from %s' % self.name,
