@@ -395,13 +395,13 @@ class OAuthRemoteApp(object):
         return client
 
     @staticmethod
-    def http_request(uri, headers=None, data=None, method=None):
+    def http_request(uri, headers=None, data=None, method=None, ssl_verification=True):
         uri, headers, data, method = prepare_request(
             uri, headers, data, method
         )
 
         ctx = ssl.create_default_context()
-        if not self._ssl_verification:
+        if not ssl_verification:
             ctx.check_hostname = False
             ctx.verify_mode = ssl.CERT_NONE
 
@@ -509,7 +509,8 @@ class OAuthRemoteApp(object):
         else:
             data = None
         resp, content = self.http_request(
-            uri, headers, data=to_bytes(body, self.encoding), method=method
+            uri, headers, data=to_bytes(body, self.encoding), method=method,
+            ssl_verification=self._ssl_verification
         )
         return OAuthResponse(resp, content, self.content_type)
 
@@ -599,6 +600,7 @@ class OAuthRemoteApp(object):
         log.debug('Generate request token header %r', headers)
         resp, content = self.http_request(
             uri, headers, method=self.request_token_method,
+            ssl_verification=self._ssl_verification
         )
         data = parse_response(resp, content)
         if not data:
@@ -647,7 +649,8 @@ class OAuthRemoteApp(object):
 
         resp, content = self.http_request(
             uri, headers, to_bytes(data, self.encoding),
-            method=self.access_token_method
+            method=self.access_token_method,
+            ssl_verification=self._ssl_verification
         )
         data = parse_response(resp, content)
         if resp.code not in (200, 201):
@@ -677,6 +680,7 @@ class OAuthRemoteApp(object):
                 headers=headers,
                 data=to_bytes(body, self.encoding),
                 method=self.access_token_method,
+                ssl_verification=self._ssl_verification
             )
         elif self.access_token_method == 'GET':
             qs = client.prepare_request_body(**remote_args)
@@ -686,6 +690,7 @@ class OAuthRemoteApp(object):
                 url,
                 headers=headers,
                 method=self.access_token_method,
+                ssl_verification=self._ssl_verification
             )
         else:
             raise OAuthException(
