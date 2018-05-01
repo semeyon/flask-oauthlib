@@ -672,6 +672,7 @@ class OAuthRemoteApp(object):
         log.debug('Prepare oauth2 remote args %r', remote_args)
         remote_args.update(self.access_token_params)
         headers = copy(self._access_token_headers)
+        log.debug(headers)
         if self.access_token_method == 'POST':
             headers.update({'Content-Type': 'application/x-www-form-urlencoded'})
             body = client.prepare_request_body(**remote_args)
