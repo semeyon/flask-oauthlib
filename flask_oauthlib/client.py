@@ -646,7 +646,7 @@ class OAuthRemoteApp(object):
             _encode(self.access_token_method)
         )
         headers.update(self._access_token_headers)
-
+        log.debug(headers)
         resp, content = self.http_request(
             uri, headers, to_bytes(data, self.encoding),
             method=self.access_token_method,
