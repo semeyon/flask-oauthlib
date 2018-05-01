@@ -685,6 +685,7 @@ class OAuthRemoteApp(object):
         elif self.access_token_method == 'GET':
             qs = client.prepare_request_body(**remote_args)
             url = self.expand_url(self.access_token_url)
+            log.info('url='+url)
             url += ('?' in url and '&' or '?') + qs
             resp, content = self.http_request(
                 url,
